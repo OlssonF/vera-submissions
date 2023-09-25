@@ -58,7 +58,7 @@ generate_persistenceRW <- function(forecast_date,
     mutate(reference_datetime = min(datetime) - lubridate::days(1),
            family = "ensemble",
            model_id = forecast_name) %>%
-    select(model_id, datetime, reference_datetime, site_id, family, parameter, variable, prediction) 
+    select(model_id, datetime, reference_datetime, depth_m, site_id, family, parameter, variable, prediction) 
   
   # write forecast
   file_date <- RW_forecasts_standard$reference_datetime[1]

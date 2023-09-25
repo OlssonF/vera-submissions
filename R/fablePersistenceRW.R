@@ -52,6 +52,7 @@ RW_daily_forecast <- function(site, var, h, depth,
     message('no targets available, no forecast run')
     empty_df <- data.frame('variable' = character(),
                            'site_id' = character(),
+                           'depth_m' = numeric(),
                            '.model' = character(),
                            'datetime' = lubridate::ymd(),
                            '.rep' = character(),
