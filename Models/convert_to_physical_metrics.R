@@ -1,6 +1,7 @@
 library(tidyverse)
 source("R/convert_physical_metrics.R")
 
+install.packages('rLakeAnalyzer')
 # Which models can we calculate the metrics for?
 models <- c('flareGOTM', 'flareSimstrat', 'glm_aed_v1')
 
