@@ -102,7 +102,7 @@ for (i in 1:length(models)) {
                depth_m = NA,
                family = 'ensemble') 
       
-      forecast_filename <- file.path('Forecasts', paste0('physical-metrics-', forecast_date, '-', forecast_model_id, '.csv'))
+      forecast_filename <- paste0('physical-metrics-', forecast_date, '-', forecast_model_id, '.csv')
       write_csv(forecast, forecast_filename)
       # vera4castHelpers::forecast_output_validator(forecast_filename)
       vera4castHelpers::submit(forecast_filename)
