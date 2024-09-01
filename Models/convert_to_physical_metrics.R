@@ -15,7 +15,7 @@ for (i in 1:length(models)) {
   
   # Dates of forecasts
   today <- paste(Sys.Date() - days(1), '00:00:00')
-  this_year <- data.frame(date = as.character(seq.Date(as_date('2024-01-01'), to = as_date(today), by = 'day')),
+  this_year <- data.frame(date = as.character(seq.Date(as_date('2024-05-01'), to = as_date(today), by = 'day')),
                           exists = NA)
   
   # what forecasts have already been submitted?
