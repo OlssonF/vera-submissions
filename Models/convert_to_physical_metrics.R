@@ -35,7 +35,7 @@ for (i in 1:length(flare_models)) {
   # is that file present in the bucket?
   this_year <- data.frame(date = flare_forecasts)
   for (date in 1:nrow(this_year)) {
-    this_year$exists[date] <- this_year$date[date] %in% mb_submissions
+    this_year$exists[date] <- this_year$date[date] %in% ss_submissions
   }
   
   
