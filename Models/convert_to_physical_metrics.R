@@ -17,21 +17,27 @@ for (i in 1:length(flare_models)) {
   forecast_model_id <- flare_models[i]
   submission_model_id <- vera_models[i]
   
-  # Dates of forecasts
-  today <- paste(Sys.Date() - days(1), '00:00:00')
-  this_year <- data.frame(date = as.character(seq.Date(as_date('2024-05-01'), to = as_date(today), by = 'day')),
-                          exists = NA)
-  
   # what forecasts have already been submitted?
   ss_submissions <- arrow::open_dataset(paste0("s3://anonymous@bio230121-bucket01/vera4cast/forecasts/parquet/project_id=vera4cast/duration=P1D/variable=SchmidtStability_Jm2_mean/model_id=",
                                                submission_model_id, 
                                                "?endpoint_override=renc.osn.xsede.org")) |> 
     distinct(reference_date) |> pull(as_vector = T)
   
+  # what forecasts are available
+  flare_forecasts <- arrow::open_dataset(paste0("s3://anonymous@bio230121-bucket01/flare/forecasts/parquet/",
+                                                "?endpoint_override=renc.osn.xsede.org")) |>
+    filter(site_id %in% sites,
+           model_id == forecast_model_id,
+           variable %in% c('temperature','Temp_C_mean'),# variable name is different for LER models
+           forecast == 1) |>
+    distinct(reference_date) |> pull(as_vector = T) 
+  
   # is that file present in the bucket?
+  this_year <- data.frame(date = flare_forecasts)
   for (date in 1:nrow(this_year)) {
-    this_year$exists[date] <- this_year$date[date] %in% ss_submissions
+    this_year$exists[date] <- this_year$date[date] %in% mb_submissions
   }
+  
   
   
   # which dates do you need to generate forecasts for?
@@ -132,18 +138,24 @@ for (i in 1:length(flare_models)) {
   forecast_model_id <- flare_models[i]
   submission_model_id <- vera_models[i]
   
-  # Dates of forecasts
-  today <- paste(Sys.Date() - days(1), '00:00:00')
-  this_year <- data.frame(date = as.character(seq.Date(as_date('2024-05-01'), to = as_date(today), by = 'day')),
-                          exists = NA)
-  
   # what forecasts have already been submitted?
   mb_submissions <- arrow::open_dataset(paste0("s3://anonymous@bio230121-bucket01/vera4cast/forecasts/parquet/project_id=vera4cast/duration=P1D/variable=Mixed_binary_mean/model_id=",
                                                submission_model_id, 
                                                "?endpoint_override=renc.osn.xsede.org")) |> 
     distinct(reference_date) |> pull(as_vector = T)
   
+  
+  # what forecasts are available
+  flare_forecasts <- arrow::open_dataset(paste0("s3://anonymous@bio230121-bucket01/flare/forecasts/parquet/",
+                                                "?endpoint_override=renc.osn.xsede.org")) |>
+    filter(site_id %in% sites,
+           model_id == forecast_model_id,
+           variable %in% c('temperature','Temp_C_mean'),# variable name is different for LER models
+           forecast == 1) |>
+    distinct(reference_date) |> pull(as_vector = T) 
+  
   # is that file present in the bucket?
+  this_year <- data.frame(date = flare_forecasts)
   for (date in 1:nrow(this_year)) {
     this_year$exists[date] <- this_year$date[date] %in% mb_submissions
   }
@@ -167,8 +179,8 @@ for (i in 1:length(flare_models)) {
       filter(reference_date == forecast_date,
              site_id %in% sites,
              model_id == forecast_model_id,
-             variable %in% c('temperature','Temp_C_mean'),
-             forecast == 1) |> # variable name is different for LER models
+             variable %in% c('temperature','Temp_C_mean'),# variable name is different for LER models
+             forecast == 1) |> 
       dplyr::collect() |> 
       rename(depth_m = depth)
     
