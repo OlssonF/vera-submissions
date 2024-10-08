@@ -61,7 +61,11 @@ for (i in 1:length(flare_models)) {
              variable %in% c('temperature','Temp_C_mean'),
              forecast == 1) |> # variable name is different for LER models
       dplyr::collect() |> 
-      rename(depth_m = depth)
+      rename(depth_m = depth) |> 
+      mutate(datetime = as_datetime(ifelse(str_detect(model_id, pattern = 'glm') & variable == 'Temp_C_mean', 
+                                           # fix the datetime for the mean daily variables calculated in the glm runs
+                                           datetime - days(1),
+                                           datetime)))
     
     if (nrow(t_forecast) < 1) {
       message(paste0("This forecast date or model doesn't exist: ",
@@ -122,9 +126,9 @@ for (i in 1:length(flare_models)) {
       vera4castHelpers::submit(forecast_filename1)
       
     }
-      
-    }
     
+  }
+  
   
   
 }
@@ -194,18 +198,18 @@ for (i in 1:length(flare_models)) {
       output <- NULL
       
       for(j in 1:length(mod_sites)) {
-       
         
-      # Mixed binary
-      mixed <- t_forecast |> 
-        split(t_forecast$parameter) |> 
-        map(~calculate_mixed_binary(., Smin = 0.1)) |> 
-        list_rbind(names_to = 'parameter') |> 
-        mutate(site_id = sites[j]) |> 
-        reframe(.by = datetime, reference_datetime, variable, site_id,
-                prediction = sum(prediction)/n())
-      
-      output <- bind_rows(output, mixed)
+        
+        # Mixed binary
+        mixed <- t_forecast |> 
+          split(t_forecast$parameter) |> 
+          map(~calculate_mixed_binary(., Smin = 0.1)) |> 
+          list_rbind(names_to = 'parameter') |> 
+          mutate(site_id = sites[j]) |> 
+          reframe(.by = datetime, reference_datetime, variable, site_id,
+                  prediction = sum(prediction)/n())
+        
+        output <- bind_rows(output, mixed)
       }
       
       forecast <-  output |> 
